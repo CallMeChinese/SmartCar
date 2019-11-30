@@ -11,69 +11,9 @@
 
 #include "varieble.h"
 #include "img_processing.h"
-
 #include "oled.h"
 
-/*
- * @name		searchline_OV7620
- * @description	To get the racing track from the imgadd.
- * @inputval	None
- * @outputval	None
- * @retval      0
- */
-
-/**
- * @brief 
- * 
- */
-void searchline_OV7620(void)
-{
-    int CurL = 0, Start = 0;	 /* CurL  当前行   Start 开始扫线的行  第一行从0开始 */
-    int Cur_Offset = car_center; /* 初始扫线中心为80，此变量为当前行中心 */
-
-    int CurPoint = Cur_Offset; /* CurPoint为当前正在扫描的点 */
-    /*
-     * 注意：右下角为（0,0）
-     * ====================按行扫描左右线===============================
-     */
-    for (CurL = Start; CurL < row_num; ++CurL)
-    {
-        CurPoint = Cur_Offset; /* CurPoint在每一行开始时为中点 */
-        /*
-         * 扫线开始
-         * 右线,右边界值应该大于0
-         */
-        while (CurPoint > 0)
-        {
-            if (*(imgadd + CurL * col_num + CurPoint) < threshold && *(imgadd + CurL * col_num + CurPoint - 1) < threshold && *(imgadd + CurL * col_num + CurPoint - 2) < threshold) /* 找到右边界  并且进行去噪 */
-            {
-                Rx[CurL] = CurPoint;
-                break;
-            }
-            else
-            { /* 没找到，向右移动一个像素点 */
-                --CurPoint;
-            }
-        }
-        /* 左线 */
-        CurPoint = Cur_Offset; /* CurPoint在每一行开始时为中点 */
-
-        while (CurPoint < col_num)
-        {
-            if (*(imgadd + CurL * col_num + CurPoint) < threshold && *(imgadd + CurL * col_num + CurPoint + 1) < threshold && *(imgadd + CurL * col_num + CurPoint + 2) < threshold) /* 找到左边界  并且进行去噪 */
-            {
-                Lx[CurL] = CurPoint;
-                break;
-            }
-            else
-            { /* 没找到，向左移动一个像素点 */
-                ++CurPoint;
-            }
-        }
-        Midx[CurL] = (Lx[CurL] + Rx[CurL]) >> 1;
-        Cur_Offset = Midx[CurL];
-    }
-}
+uint8_t binImg[row_num*col_num];
 
 /**
  * @brief Note that the image get from camera is wider than OLED, 
@@ -96,45 +36,43 @@ unsigned char display_col[158] = {
 };
 
 /**
- * @brief Display the image get from the camera
+ * @brief Convert gray image to binary value image
  * 
+ * @param threshold 
  */
-void dispimage(void)
+void Gray2Bin()
 {
-    uint16_t i = 0, j = 0;
-    uint16_t state = 0;
-
+    uint8_t i, j;
     for (i = 0; i < row_num; i++)
     {
         for (j = 0; j < col_num; j++)
         {
             if (imgadd[i * col_num + j] > threshold)
             {
-                OLED_DrawPoint(display_col[j], i + 14, 1);
+                binImg[i*col_num+j] = 0xff;
             }
             else
             {
-                OLED_DrawPoint(display_col[j], i + 14, 0);
+                binImg[i*col_num+j] = 0x00;
             }
         }
     }
-    OLED_Refresh_Gram();
 }
 
 /**
- * @brief 
+ * @brief Display the image get from the camera
  * 
  */
-void dispimage1(void)
+void DispBinImg()
 {
-    uint16_t i = 0, j = 0;
-    uint16_t state = 0;
+    uint8_t i, j;
+    Gray2Bin(threshold);
 
     for (i = 0; i < row_num; i++)
     {
         for (j = 0; j < col_num; j++)
         {
-            if (imgadd[i * col_num + j] > threshold)
+            if (binImg[i * col_num + j])
             {
                 OLED_DrawPoint(display_col[j], i + 14, 1);
             }
@@ -143,12 +81,6 @@ void dispimage1(void)
                 OLED_DrawPoint(display_col[j], i + 14, 0);
             }
         }
-
-        /* 画出找到的边界线 */
-        if (Lx[i] != col_num && Lx[i] > 0)
-            OLED_DrawPoint(display_col[Lx[i]], i + 14, 1);
-        if (Rx[i] != 0 && Rx[i] < col_num)
-            OLED_DrawPoint(display_col[Rx[i]], i + 14, 1);
     }
-    OLED_Refresh_Gram();
+    // OLED_Refresh_Gram();
 }

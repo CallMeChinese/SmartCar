@@ -14,7 +14,7 @@ uint16_t vsync = 0;
 //不建议在中断服务函数中执行延时或数据处理/串口收发
 void GPIO_ISR(uint32_t array)
 {
-    GPIO_ToggleBit(HW_GPIOB, 11);
+    // GPIO_ToggleBit(HW_GPIOB, 11);
     if (array & (1 << 7)) //行中断
     {
         if (H_Cnt % 2 == 1 && H_Cnt < 100)

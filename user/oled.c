@@ -30,6 +30,51 @@
  */
 uint8_t OLED_GRAM[128][8];
 
+uint8_t Int2String(int32_t src, char* dst, uint8_t withSpace)
+{
+    uint8_t isMinus = 0;
+    uint8_t lenth = 0;
+    int32_t temp = src;
+    if (temp < 0) 
+    {
+        isMinus = 1;
+        temp *= (-1);
+    }
+
+    if (temp == 0)
+    {
+        lenth = 1;
+        dst[0] = 0 + '0';
+        dst[1] = '\0';
+    }
+    else
+    {
+        GPIO_SetBit(HW_GPIOB, 17);
+        while(temp != 0)
+        {
+            dst[lenth] = (temp % 10) + '0';
+            ++lenth;
+            temp /= 10;
+        }
+        GPIO_ResetBit(HW_GPIOB, 17);
+        if (isMinus)
+        {
+            dst[lenth] = '-';
+            ++lenth;
+        }
+        else
+        {
+            if (withSpace)
+            {
+                dst[lenth] = ' ';
+                ++lenth;
+            }
+        }
+        dst[lenth] = '\0';
+    }
+    return lenth;
+}
+
 /**
  * @brief Write a byte to SSD1306
  * 
@@ -97,15 +142,24 @@ void OLED_Display_Off(void)
 }
 
 /**
- * @brief Clear the OLED screen
+ * @brief Clear memory of OLED
  * 
  */
-void OLED_Clear(void)
+void OLED_ClearData(void)
 {
     uint8_t i, n;
     for (i = 0; i < 8; i++)
         for (n = 0; n < 128; n++)
             OLED_GRAM[n][i] = 0X00;
+}
+
+/**
+ * @brief Clear the OLED screen
+ * 
+ */
+void OLED_Clear(void)
+{
+    OLED_ClearData();
     OLED_Refresh_Gram();
 }
 
@@ -211,14 +265,31 @@ void OLED_DispChar(uint8_t x, uint8_t y, uint8_t chr, uint8_t size, uint8_t mode
  * @param p 
  * @param mode 
  */
-void OLED_DispString_1608(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode)
+uint8_t OLED_DispString_1608(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uint8_t align)
 {
-    while (*p != '\0')
+    uint8_t lenth, i;
+    for (lenth = 0; p[lenth] != '\0'; ++lenth);
+    if (align == ALIGN_LEFT)
     {
-        OLED_DispChar(x, y, *p, 16, mode);
-        x += 8;
-        p++;
+        while (*p != '\0')
+        {
+            OLED_DispChar(x, y, *p, 16, mode);
+            x += 8;
+            ++p;
+        }
     }
+    else
+    {
+        x = 127 - x;
+        p += lenth;
+        for (i = lenth; i > 0; --i)
+        {
+            --p;
+            x -= 8;
+            OLED_DispChar(x, y, *p, 16, mode);
+        }
+    }
+    return lenth;
 }
 
 /**
@@ -229,79 +300,84 @@ void OLED_DispString_1608(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode)
  * @param p 
  * @param mode 
  */
-void OLED_DispString_1206(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode)
+uint8_t OLED_DispString_1206(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uint8_t align)
 {
-    while (*p != '\0')
+    uint8_t lenth, i;
+    for (lenth = 0; p[lenth] != '\0'; ++lenth);
+    if (align == ALIGN_LEFT)
     {
-        OLED_DispChar(x, y, *p, 12, mode);
-        x += 6;
-        p++;
+        while (*p != '\0')
+        {
+            OLED_DispChar(x, y, *p, 12, mode);
+            x += 6;
+            ++p;
+        }
     }
+    else
+    {
+        x = 127 - x;
+        p += lenth;
+        for (i = lenth; i > 0; --i)
+        {
+            --p;
+            x -= 6;
+            OLED_DispChar(x, y, *p, 12, mode);
+        }
+    }
+    return lenth;
 }
 
 /**
- * @brief Display a float number on OLED screen
+ * @brief Display a float number on OLED screen(Note that the function has not 
+ * been finished)
  * 
  * @param x 
  * @param y 
  * @param num 
  * @param mode 
  */
-void OLED_DispFloat_1206(uint8_t x, uint8_t y, float num, uint8_t mode)
+uint8_t OLED_DispFloat_1206(uint8_t x, uint8_t y, float num, uint8_t mode, uint8_t align)
 {
-    uint8_t numStr[10] = "", strCnt = 0, p;
-    uint16_t numInt = (uint16_t)(num * 100);
-
-    while (numInt != 0)
-    {
-        numInt /= 10;
-        strCnt++;
-    }
-    strCnt += 1;
-    numStr[strCnt] = '\0';
-    numInt = (uint16_t)(num * 100);
-
-    p = strCnt - 1;
-    while (numInt != 0)
-    {
-        numStr[p--] = (numInt % 10) + '0';
-        numInt /= 10;
-        if (p == strCnt - 3)
-            numStr[p--] = '.';
-    }
-
-    OLED_DispString_1206(x, y, numStr, mode);
+    return 0;
 }
 
 /**
- * @brief Display an int number on OLED screen
+ * @brief Display an int number on OLED screen(Note that the integer is aligned
+ * to the right)
  * 
  * @param x 
  * @param y 
  * @param num 
  * @param mode 
  */
-void OLED_DispInt_1206(uint8_t x, uint8_t y, int32_t num, uint8_t mode)
+uint8_t OLED_DispInt_1206(uint8_t x, uint8_t y, int32_t num, uint8_t mode, uint8_t align)
 {
-    if (num == 0)
-        num = 1;
-    if (num < 0)
-        num = -num;
-    uint8_t numStr[19] = "", strCnt = 0, p;
-    uint8_t nS[19] = "";
-    int i;
-    while (num > 0)
-    {
-        numStr[strCnt++] = num % 10 + '0';
-        num /= 10;
-    }
-    for (i = 0; i < strCnt; i++)
-    {
-        nS[i] = numStr[strCnt - i - 1];
-    }
-    nS[strCnt + 1] = '\0';
+    uint8_t lenth, i;
+    char strNum[20] = {0};
+    char *strInt = strNum;
+    lenth = Int2String(num, strInt, 1);
 
-    OLED_DispString_1206(x, y, nS, mode);
+    if (align == ALIGN_RIGHT)
+    {
+        x = 121 - x;
+        while(*strInt != '\0')
+        {
+            OLED_DispChar(x, y, *strInt, 12, mode);
+            ++strInt;
+            x -= 6;
+        }
+    }
+    else
+    {
+        strInt += lenth;
+        for (i = lenth; i > 0; --i)
+        {
+            --strInt;
+            OLED_DispChar(x, y, *strInt, 12, mode);
+            x += 6;
+        }
+    }
+    return lenth;
 }
 
 /**
@@ -363,7 +439,7 @@ void OLED_Init(void)
     OLED_WR_Byte(0xAF, OLED_CMD); //开启显示
     OLED_Clear();
 
-    OLED_DispString_1608(0, 0, (uint8_t *)("OLED"), 1); //初始化成功提示。
+    // OLED_DispString_1608(0, 0, (uint8_t *)("OLED"), 1); //初始化成功提示。
     OLED_Refresh_Gram();
 
     OLED_Welcome();
@@ -389,7 +465,7 @@ void OLED_Welcome(void)
             }
         }
     }
-    OLED_DispString_1608(18, 50, "SEU SMARTCAR", 1);
+    OLED_DispString_1608(18, 50, "SEU SMARTCAR", 1, ALIGN_LEFT);
     //   OLED_DrawPoint(t,i,1);
     OLED_Refresh_Gram();
     for (int t = 0; t < 10000; ++t)

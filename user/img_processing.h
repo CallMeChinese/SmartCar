@@ -14,9 +14,8 @@
 
 #include "common.h"
 
-void searchline_OV7620(void);
-void dispimage(void);
-void dispimage1(void);
+void Gray2Bin();
+void DispBinImg();
 
 extern int DX[150];
 

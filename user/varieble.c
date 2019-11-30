@@ -25,6 +25,11 @@ uint8_t* L_Start;
 uint8_t* L_End;
 uint8_t* R_Start;
 uint8_t* R_End;
+int32_t  threshold;
+int32_t  Kp;
+int32_t  Ki;
+int32_t  Kd;
+
 
 
 //每一行的lp1,lp2扫描偏移量

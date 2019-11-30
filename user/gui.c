@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2019
  * 
  */
+#include "stdio.h"
 #include "math.h"
 #include "chlib_k.h"
 #include "varieble.h"
@@ -21,29 +22,30 @@
 #include "uart.h"
 #include "gui.h"
 
-int page = 1;     /* 初始为第一页 */
-int menuRow = 1;  /* 记录当前是第几排 值可以为1、2、3、4、5  修改了排数的除外 */
-int keyState = 0; /* 用于记录五项开关的值 */
-const unsigned char row_pos[5] = {0, 13, 26, 39, 52};
+const uint8_t row_pos[5] = {0, 13, 26, 39, 52};
+uint8_t* options[] = {"Bin Image", "Threshold", "Kp", "Ki", "Kd"};
+int32_t* values[] = {&threshold, &Kp, &Ki, &Kd};
+
+uint8_t keyState = 0;           /* 用于记录五项开关的值 */
 int key_counter = 0;
 int key_temp = 0;
-int temp1;
-int temp2;
-int temp3;
-int temp4;
-int temp5;
-int temp6;
-int temp7;
-int clearCount = 0;
 
-/*
- *  GPIO_QuickInit(HW_GPIOE, 0, kGPIO_Mode_IPU);   //右
- *  GPIO_QuickInit(HW_GPIOE, 1, kGPIO_Mode_IPU);   //上
- *  GPIO_QuickInit(HW_GPIOE, 3, kGPIO_Mode_IPU);   //左
- *  GPIO_QuickInit(HW_GPIOE, 2, kGPIO_Mode_IPU);   //中
- *  GPIO_QuickInit(HW_GPIOC, 18, kGPIO_Mode_IPU);  //下
+uint8_t optionsCount = sizeof(options)/sizeof(char*);
+uint8_t pagesCount = 2;
+
+int8_t optionIndex = 0;
+uint8_t imgOptionsCount = 1;
+uint8_t page = 0;               /* 初始为第一页 */
+uint8_t option = 0;
+uint8_t pageType = MENU_PAGE;
+uint8_t detailType;
+uint8_t menuRow = 1;            /* 记录当前是第几排 值可以为1、2、3、4、5  修改了排数的除外 */
+
+/**
+ * @brief 
+ * 
+ * @return int 
  */
-
 int keyCheck(void) /*按键检测 */
 {
     int key_lable = 0;
@@ -94,7 +96,8 @@ int keyCheck(void) /*按键检测 */
     }
     /* 标签位不为0，有键按下 */
     else
-    {                      /*有按键按下 */
+    {
+        // 有按键按下
         if (key_temp == 0) /* 之前没有检测到按键按下 */
         {
             key_temp = key_lable;
@@ -105,41 +108,79 @@ int keyCheck(void) /*按键检测 */
     }
 }
 
+void DispMenuPage(void)
+{
+    uint8_t startOption = page*MAX_OPTION_COUNT;
+    uint8_t i;
+    char buffer[9];
+    sprintf(buffer, "Page %d/%d", page+1, pagesCount);
+    OLED_DispString_1206(13, row_pos[0], buffer, 1, ALIGN_LEFT);
+    for (i = 0; i < MAX_OPTION_COUNT; ++i)
+    {
+        if (startOption + i >= optionsCount)
+        {
+            break;
+        }
+        else
+        {
+            OLED_DispString_1206(13, row_pos[i+1], options[startOption+i], 1, ALIGN_LEFT);
+        }
+    }
+    OLED_DispString_1206(3, row_pos[option+1], "$", 1, ALIGN_LEFT);
+}
+
+void DispDetailPage(void)
+{
+    uint8_t index;
+    OLED_DispString_1206(13, row_pos[0], options[optionIndex], 1, ALIGN_LEFT);
+    if (optionIndex < imgOptionsCount)
+    {
+        detailType = IMAGE_PAGE;
+        index = optionIndex;
+        switch (index)
+        {
+        case 0:
+        {
+            DispBinImg();
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
+    }
+    else
+    {
+        detailType = VALUE_PAGE;
+        index = optionIndex - imgOptionsCount;
+        OLED_DispInt_1206(13, row_pos[2], *values[index], 1, ALIGN_RIGHT);
+    }
+    
+}
+
 /**
  * @brief 
  * 
  */
 void menu()
 {
-    if (clearCount == 20)
+    if (pageType == MENU_PAGE)
     {
-        clearCount = 0;
-        if (page != 1)
-        {
-            OLED_Clear();
-        }
+        DispMenuPage();
+    }
+    else if (pageType == DETAIL_PAGE)
+    {
+        DispDetailPage();
     }
     else
     {
-        ++clearCount;
+
     }
-    if (page == 1)
-    { /* 第一页显示图像 */
-        dispimage();
-    }
-    else if (page == 2)
-    {
-        MenuShow2();
-    }
-    else if (page == 3)
-    {
-        MenuShow3();
-    }
-    FlashValueOperate(); /* 根据按键信息，修改变量值 */
-    keyState = keyCheck();
-    SignMove();                                           /* 行标移动+页数显示 */
-    OLED_DispInt_1206(0, row_pos[menuRow - 1], page, 1); /* 当前页数和当前行显示 */
     OLED_Refresh_Gram();
+    keyState = keyCheck();
+    if (keyState) OLED_Clear();
+    SignMove();
 }
 
 /**
@@ -148,85 +189,119 @@ void menu()
  */
 void SignMove()
 {
-    if (page == 1)
+    switch (keyState)
     {
-        OLED_DispString_1206(13, row_pos[0], "image", 1);
-    }
-    if (0)
+    case KEY_UP:
     {
-    }
-    else
-    {
-        if (keyState == KEY_UP)
+        GPIO_ResetBit(HW_GPIOB, 11);
+        GPIO_ResetBit(HW_GPIOB, 17);
+        if (pageType == MENU_PAGE)
         {
-            if (menuRow == 1)
-            {
-                /* 第二页第一行按上键 */
-                if (page == 2)
-                {
-                    page = 1;
-                    OLED_Clear();
-                }
-                /* 第一页翻到最后一页 */
-                else if (page == 1)
-                {
-                    page = MAX_PAGE_COUNT;
-                    OLED_Clear();
-                    menuRow = 5;
-                }
-                else
-                {
-                    page = page - 1;
-                    OLED_Clear();
-                    menuRow = 5;
-                }
-            }
-            else
-            {
-                --menuRow;
-                /* 填充之前写的数字 */
-                OLED_Fill(0, row_pos[menuRow], 13, row_pos[menuRow] + 13, 0);
-            }
+            --optionIndex;
+            if (optionIndex < 0) optionIndex += optionsCount;
+            page = optionIndex / MAX_OPTION_COUNT;
+            option = optionIndex % MAX_OPTION_COUNT;
         }
-        else if (keyState == KEY_DOWN)
+        else if (pageType == DETAIL_PAGE)
         {
-            /* 第一页按下键 */
-            if (page == 1)
-            {
-                page = 2;
-                menuRow = 1;
-                OLED_Clear();
-                OLED_DispInt_1206(0, row_pos[menuRow - 1], page, 1);
-            }
-            /* 最后一行按下键 */
-            else if (menuRow == 5)
-            {
-                if (page == MAX_PAGE_COUNT)
-                {
-                    page = 1;
-                    menuRow = 1;
-                    OLED_Clear();
-                }
-                else
-                {
-                    page = page + 1;
-                    menuRow = 1;
-                    OLED_Clear();
-                }
-            }
-            else
-            { /* 翻页 */
-                OLED_Clear();
-                OLED_Fill(0, row_pos[menuRow - 1], 13, row_pos[menuRow - 1] + 13, 0); /* 填充之前写的数字 */
-                menuRow = menuRow + 1;
-            }
-        }
-        else if (keyState == KEY_MID)
-        {
+
         }
         else
         {
+            
         }
+        break;
+    }
+    case KEY_DOWN:
+    {
+        GPIO_ResetBit(HW_GPIOB, 11);
+        GPIO_SetBit(HW_GPIOB, 17);
+        if (pageType == MENU_PAGE)
+        {
+            ++optionIndex;
+            if (optionIndex >= optionsCount) optionIndex -= optionsCount;
+            page = optionIndex / MAX_OPTION_COUNT;
+            option = optionIndex % MAX_OPTION_COUNT;
+        }
+        else if (pageType == DETAIL_PAGE)
+        {
+
+        }
+        else
+        {
+            
+        }
+        break;
+    }
+    case KEY_LEFT:
+    {
+        GPIO_SetBit(HW_GPIOB, 11);
+        GPIO_ResetBit(HW_GPIOB, 17);
+        if (pageType == MENU_PAGE)
+        {
+            if (optionIndex == 0) optionIndex = optionsCount - 1;
+            else
+            {
+                optionIndex -= MAX_OPTION_COUNT;
+                if (optionIndex < 0) optionIndex = 0;
+            }
+            page = optionIndex / MAX_OPTION_COUNT;
+            option = optionIndex % MAX_OPTION_COUNT;
+        }
+        else if (pageType == DETAIL_PAGE)
+        {
+
+        }
+        else
+        {
+            
+        }
+        break;
+    }
+    case KEY_RIGHT:
+    {
+        GPIO_SetBit(HW_GPIOB, 11);
+        GPIO_SetBit(HW_GPIOB, 17);
+        if (pageType == MENU_PAGE)
+        {
+            if (optionIndex == optionsCount - 1) optionIndex = 0;
+            else
+            {
+                optionIndex += MAX_OPTION_COUNT;
+                if (optionIndex >= optionsCount) optionIndex = optionsCount - 1;
+            }
+            page = optionIndex / MAX_OPTION_COUNT;
+            option = optionIndex % MAX_OPTION_COUNT;
+        }
+        else if (pageType == DETAIL_PAGE)
+        {
+
+        }
+        else
+        {
+            
+        }
+        break;
+    }
+    case KEY_MID:
+    {
+        if (pageType == MENU_PAGE)
+        {
+            pageType = DETAIL_PAGE;
+        }
+        else if (pageType == DETAIL_PAGE)
+        {
+            pageType = MENU_PAGE;
+        }
+        else
+        {
+            
+        }
+    }
+    default:
+    {
+        break;
+    }
     }
 }
 
@@ -296,91 +371,6 @@ void FlashValueOperate()
         break;
         }
     }
-}
-
-/**
- * @brief 
- * 
- */
-void MenuShow2() /* 显示不了浮点数，但是类型是浮点数类型，所以现实的时候还是要进行处理 */
-{
-    OLED_DispString_1206(16, row_pos[0], "string1", 1);
-    if (number < 0)
-    {
-        OLED_DispString_1206(65, row_pos[0], "-", 1);
-        OLED_DispInt_1206(72, row_pos[0], flashData[0], 1);
-    }
-    else
-    {
-        OLED_DispString_1206(65, row_pos[0], "+", 1);
-        OLED_DispInt_1206(72, row_pos[0], flashData[0], 1);
-    } /* OLED_DispString_1206(72,row_pos[0],"value1",1); */
-
-    OLED_DispString_1206(16, row_pos[1], "string2", 1);
-    if (number < 0)
-    {
-        OLED_DispString_1206(65, row_pos[1], "-", 1);
-        OLED_DispInt_1206(72, row_pos[1], flashData[1], 1);
-    }
-    else
-    {
-        OLED_DispString_1206(65, row_pos[1], "+", 1);
-        OLED_DispInt_1206(72, row_pos[1], flashData[1], 1);
-    } /* OLED_DispString_1206(72,row_pos[0],"value1",1); */
-
-    OLED_DispString_1206(16, row_pos[2], "string3", 1);
-    if (number < 0)
-    {
-        OLED_DispString_1206(65, row_pos[2], "-", 1);
-        OLED_DispInt_1206(72, row_pos[2], -number, 1);
-    }
-    else
-    {
-        OLED_DispString_1206(65, row_pos[2], "+", 1);
-        OLED_DispInt_1206(72, row_pos[2], number, 1);
-    } /* OLED_DispString_1206(72,row_pos[0],"value1",1); */
-
-    OLED_DispString_1206(16, row_pos[3], "string4", 1);
-    if (number < 0)
-    {
-        OLED_DispString_1206(65, row_pos[3], "-", 1);
-        OLED_DispInt_1206(72, row_pos[3], -number, 1);
-    }
-    else
-    {
-        OLED_DispString_1206(65, row_pos[3], "+", 1);
-        OLED_DispInt_1206(72, row_pos[3], number, 1);
-    } /* OLED_DispString_1206(72,row_pos[0],"value1",1); */
-
-    OLED_DispString_1206(16, row_pos[4], "string5", 1);
-    if (number < 0)
-    {
-        OLED_DispString_1206(65, row_pos[4], "-", 1);
-        OLED_DispInt_1206(72, row_pos[4], -number, 1);
-    }
-    else
-    {
-        OLED_DispString_1206(65, row_pos[4], "+", 1);
-        OLED_DispInt_1206(72, row_pos[4], number, 1);
-    } /* OLED_DispString_1206(72,row_pos[0],"value1",1); */
-}
-
-/**
- * @brief 
- * 
- */
-void MenuShow3()
-{
-    OLED_DispString_1206(16, row_pos[0], "string1", 1);
-    OLED_DispInt_1206(72, row_pos[0], number, 1); /* OLED_DispString_1206(72,row_pos[0],"value1",1); 显示不了浮点数，但是类型是浮点数类型，所以现实的时候还是要进行处理 */
-    OLED_DispString_1206(16, row_pos[1], "string2", 1);
-    OLED_DispInt_1206(72, row_pos[1], number, 1); /* OLED_DispString_1206(72,row_pos[1],"value2",1); */
-    OLED_DispString_1206(16, row_pos[2], "string3", 1);
-    OLED_DispInt_1206(72, row_pos[2], number, 1); /* OLED_DispString_1206(72,row_pos[2],"value3",1); */
-    OLED_DispString_1206(16, row_pos[3], "string4", 1);
-    OLED_DispInt_1206(72, row_pos[3], number, 1); /* OLED_DispString_1206(72,row_pos[3],"value4",1); */
-    OLED_DispString_1206(16, row_pos[4], "string5", 1);
-    OLED_DispInt_1206(72, row_pos[4], number, 1); /* OLED_DispString_1206(72,row_pos[4],"value5",1); */
 }
 
 /*

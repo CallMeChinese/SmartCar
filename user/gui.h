@@ -9,39 +9,29 @@
  * 
  */
 
-#define KEY_UP          1       // Upper
-#define KEY_DOWN        2       // Down
-#define KEY_LEFT        3       // Left
-#define KEY_RIGHT       4       // Right
-#define KEY_MID         5       // Select
-#define MAX_PAGE_COUNT  3
+#define KEY_UP              1       // Upper
+#define KEY_DOWN            2       // Down
+#define KEY_LEFT            3       // Left
+#define KEY_RIGHT           4       // Right
+#define KEY_MID             5       // Select
 
-extern int keyState;
-extern int menuRow;
-extern int temp1;
-extern int temp2;
-extern int temp3;
-extern int temp4;
-extern int temp5;
-extern int temp6;
-extern int temp7;
-extern int key_counter;
-extern int key_temp;
-extern const unsigned char row_pos[5];
-extern int clearCount;
+#define MENU_PAGE           0
+#define DETAIL_PAGE         1
 
-extern void menu();
+#define IMAGE_PAGE          0
+#define VALUE_PAGE          1
 
-extern void flashWrite();
-extern void SignMove();
+#define MAX_OPTION_COUNT    4
 
-extern int keyCheck(void);
+int keyCheck(void);
+
+void DispMenuPage(void);
+void menu();
+void SignMove();
+void MenuPage();
+void DetailPage();
+
 
 extern void FlashValueOperate();
-
-extern void MenuShow3();
-
-extern void MenuShow2();
-
 extern void flashDataSave();
 extern void flashDataRead();

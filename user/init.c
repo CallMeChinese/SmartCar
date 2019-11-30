@@ -77,6 +77,12 @@ void init(void)
     GPIO_QuickInit(HW_GPIOE, 3, kGPIO_Mode_IPU);                // Left
     GPIO_QuickInit(HW_GPIOE, 2, kGPIO_Mode_IPU);                // Center
     GPIO_QuickInit(HW_GPIOC, 18, kGPIO_Mode_IPU);               // Down
+
+    // Varielbe
+    threshold = 110;
+    Kp = 0;
+    Ki = 0;
+    Kd = 0;
 }
 
 /**

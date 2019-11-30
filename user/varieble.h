@@ -19,7 +19,6 @@
 #define     P_WIDTH             8               //lp1，和lp2指针的之间宽度
 
 #define     BW_DELTA            50
-#define     threshold           100             //threshold为阈值，小于这个阈值便视为黑色
 #define     LINE_EDGE           2
 
 #define     BLOCK_LEN           20
@@ -40,6 +39,10 @@ extern      uint8_t             *L_Start;
 extern      uint8_t             *L_End;
 extern      uint8_t             *R_Start;
 extern      uint8_t             *R_End;
+extern      int32_t             threshold;
+extern      int32_t             Kp;
+extern      int32_t             Ki;
+extern      int32_t             Kd;
 
 extern const uint8_t offset[];
 extern      float               number;
