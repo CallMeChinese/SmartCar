@@ -37,6 +37,7 @@ int main()
     while (1)
     {
         menu();
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH7, 2000); 
     }
     return 0;
 }

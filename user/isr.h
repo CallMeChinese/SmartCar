@@ -16,5 +16,5 @@
 #include "varieble.h"
 
  void GPIO_ISR(uint32_t array);
-
+ void PE_GPIO_ISR(uint32_t array);
 #endif

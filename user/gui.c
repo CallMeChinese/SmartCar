@@ -178,9 +178,11 @@ void menu()
 
     }
     OLED_Refresh_Gram();
-    keyState = keyCheck();
+    //keyState = keyCheck();
     if (keyState) OLED_Clear();
+    
     SignMove();
+    keyState=0;
 }
 
 /**
