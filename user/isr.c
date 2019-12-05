@@ -38,28 +38,28 @@ void GPIO_ISR(uint32_t array)
         }
     }
 
-    if (array & (1u << 18))            
-    {
-      keyState=2;
-    }
+    // if (array & (1u << 18))
+    // {
+    //     keyState = 2;
+    // }
 }
 
-void PE_GPIO_ISR(uint32_t array)
-{
-  if(array&(1u << 0))                   //right 中断
-  {
-    keyState=4;
-  }
-  if(array&(1u << 1))                    //up 中断
-  {
-    keyState=1;
-  }
-  if(array&(1u << 2))                    //center 中断
-  {
-    keyState=5;
-  }
-  if(array&(1u << 3))                    //left 中断
-  {
-    keyState=3;
-  }
-}
+// void PE_GPIO_ISR(uint32_t array)
+// {
+//     if (array & (1u << 0)) //right 中断
+//     {
+//         keyState = 4;
+//     }
+//     if (array & (1u << 1)) //up 中断
+//     {
+//         keyState = 1;
+//     }
+//     if (array & (1u << 2)) //center 中断
+//     {
+//         keyState = 5;
+//     }
+//     if (array & (1u << 3)) //left 中断
+//     {
+//         keyState = 3;
+//     }
+// }

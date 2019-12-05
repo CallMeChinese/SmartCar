@@ -73,24 +73,24 @@ void init(void)
 
     // 5DirKey
     GPIO_QuickInit(HW_GPIOE, 0, kGPIO_Mode_IPU);                // Right
-    GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOE, 0, kGPIO_IT_FallingEdge, true);
+    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
+    // GPIO_ITDMAConfig(HW_GPIOE, 0, kGPIO_IT_FallingEdge, true);
     
     GPIO_QuickInit(HW_GPIOE, 1, kGPIO_Mode_IPU);                // Upper
-    GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOE, 1, kGPIO_IT_FallingEdge, true);
+    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
+    // GPIO_ITDMAConfig(HW_GPIOE, 1, kGPIO_IT_FallingEdge, true);
      
     GPIO_QuickInit(HW_GPIOE, 3, kGPIO_Mode_IPU);                // Left
-    GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOE, 3, kGPIO_IT_FallingEdge, true);
+    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
+    // GPIO_ITDMAConfig(HW_GPIOE, 3, kGPIO_IT_FallingEdge, true);
     
     GPIO_QuickInit(HW_GPIOE, 2, kGPIO_Mode_IPU);                // Center
-    GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOE, 2, kGPIO_IT_FallingEdge, true);
+    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
+    // GPIO_ITDMAConfig(HW_GPIOE, 2, kGPIO_IT_FallingEdge, true);
      
     GPIO_QuickInit(HW_GPIOC, 18, kGPIO_Mode_IPU);               // Down
-    GPIO_CallbackInstall(HW_GPIOC, GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOC, 18, kGPIO_IT_FallingEdge, true);
+    // GPIO_CallbackInstall(HW_GPIOC, GPIO_ISR);
+    // GPIO_ITDMAConfig(HW_GPIOC, 18, kGPIO_IT_FallingEdge, true);
     // Varielbe
     threshold = 110;
     Kp = 0;
