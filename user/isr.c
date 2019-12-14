@@ -8,6 +8,8 @@
 
 #include "isr.h"
 #include "MK60DZ10.h"
+#include "math.h"
+
 uint16_t vsync = 0;
 extern uint8_t keyState;
 //中断服务函数，需要采集数据量(行，场)可自行修改
@@ -63,3 +65,32 @@ void GPIO_ISR(uint32_t array)
 //         keyState = 3;
 //     }
 // }
+
+/**
+ * @brief 
+ * 
+ */
+void PIT_ISR(void)
+{
+    // TODO: make new speeds
+    int delta;
+    double angel;
+    angel = atan(ratio);
+    preError = curError;
+    curError = (int)(angel*250);
+    sumError += curError;
+    rotateSpeed = (int)(DirKp*curError + DirKi*sumError + DirKd*(curError-preError));
+    if (rotateSpeed > LIMITED_SPEED) rotateSpeed = LIMITED_SPEED;
+    if (rotateSpeed < -LIMITED_SPEED) rotateSpeed = -LIMITED_SPEED;
+
+    delta = intercept - col_num/2;
+    forwardSpeed = BASE_SPEED;
+    // if (rotateSpeed >= 0)
+    // {
+    //     forwardSpeed = BASE_SPEED - 5*delta;
+    // }
+    // else
+    // {
+    //     forwardSpeed = BASE_SPEED + 5*delta;
+    // }
+}

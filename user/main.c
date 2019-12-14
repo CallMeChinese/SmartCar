@@ -24,6 +24,7 @@
 #include "flash.h"
 #include "upper_monitor.h"
 #include "DEV_SCCB.h"
+#include "motor.h"
 
 /**
  * @brief 
@@ -36,8 +37,9 @@ int main()
     init();
     while (1)
     {
+        ImgProcess();
+        Move();
         menu();
-        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH7, 2000); 
     }
     return 0;
 }

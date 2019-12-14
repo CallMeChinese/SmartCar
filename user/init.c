@@ -66,6 +66,8 @@ void init(void)
     init_oled();
     // init_steer();
     init_motor();
+    init_controller();
+    init_varieble();
 
     GPIO_ITDMAConfig(HW_GPIOC, 6, kGPIO_IT_FallingEdge, true);
     GPIO_ITDMAConfig(HW_GPIOC, 7, kGPIO_IT_RisingEdge, true);
@@ -92,10 +94,6 @@ void init(void)
     // GPIO_CallbackInstall(HW_GPIOC, GPIO_ISR);
     // GPIO_ITDMAConfig(HW_GPIOC, 18, kGPIO_IT_FallingEdge, true);
     // Varielbe
-    threshold = 110;
-    Kp = 0;
-    Ki = 0;
-    Kd = 0;
 }
 
 /**
@@ -174,5 +172,37 @@ void init_motor(void)
     FTM_PWM_QuickInit(FTM0_CH5_PD05, kPWM_EdgeAligned, 1000, 0);        //PWM2   right_backward
     FTM_PWM_QuickInit(FTM0_CH6_PD06, kPWM_EdgeAligned, 1000, 0);        //PWM3   left_forward
     FTM_PWM_QuickInit(FTM0_CH7_PD07, kPWM_EdgeAligned, 1000, 0);        //PWM4   left_backward
+    return;
+}
+
+/**
+ * @brief 
+ * 
+ */
+void init_controller(void)
+{
+    PIT_QuickInit(HW_PIT_CH0, INTERVAL);
+    PIT_ITDMAConfig(HW_PIT_CH0, kPIT_IT_TOF, ENABLE);
+    PIT_CallbackInstall(HW_PIT_CH0, PIT_ISR);
+    return;
+}
+
+/**
+ * @brief 
+ * 
+ */
+void init_varieble(void)
+{
+    threshold = 110;
+    DirKp = 1;
+    DirKi = 0;
+    DirKd = 0;
+    ratio = 0;
+    intercept = col_num/2;
+    forwardSpeed = 0;
+    rotateSpeed = 0;
+    sumError = 0;
+    preError = 0;
+    curError = 0;
     return;
 }

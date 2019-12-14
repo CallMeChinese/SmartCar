@@ -14,9 +14,13 @@
 
 #include "chlib_k.h"
 
+#define INTERVAL        10000           // PIT_controller length, in us
+
 void init(void);
 void init_ov7620(void);
 void init_oled(void);
 void init_steer(void);
 void init_motor(void);
+void init_controller(void);
+void init_varieble(void);
 #endif 

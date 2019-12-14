@@ -10,15 +10,35 @@
  */
 
 #include "motor.h"
-  
 
 /**
- * @brief 前进
+ * @brief Move the car
  * 
- * @param 速度（占空比—） 
  */
-void Run_forward(uint32_t speed)
+void Move(void)
 {
-  FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH3, 5000); 
-  FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH3, 5000); 
+    int32_t leftForward, rightForward;
+    leftForward = forwardSpeed + rotateSpeed;
+    rightForward = forwardSpeed - rotateSpeed;
+    if (leftForward >= 0)
+    {
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH6, leftForward);
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH7, 0);
+    }
+    else
+    {
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH6, 0);
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH7, -leftForward);
+    }
+    if (rightForward >= 0)
+    {
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH4, rightForward);
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH5, 0);
+    }
+    else
+    {
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH4, 0);
+        FTM_PWM_ChangeDuty(HW_FTM0, HW_FTM_CH5, -rightForward);
+    }
+    return;
 }

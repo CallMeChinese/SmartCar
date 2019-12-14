@@ -17,4 +17,5 @@
 
 void GPIO_ISR(uint32_t array);
 // void PE_GPIO_ISR(uint32_t array);
+void PIT_ISR(void);
 #endif

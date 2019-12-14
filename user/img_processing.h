@@ -14,8 +14,12 @@
 
 #include "common.h"
 
+void LinearFit(uint8_t* dataY, uint8_t dataCnt);
 void Gray2Bin();
+void GetCenterPoints();
 void DispBinImg();
+void DispProcessedImg(uint8_t withCenterPoint);
+void ImgProcess();
 
 extern int DX[150];
 

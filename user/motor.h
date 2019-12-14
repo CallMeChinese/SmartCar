@@ -13,7 +13,8 @@
 #define MOTER_H
 
 #include "chlib_k.h"
+#include "varieble.h"
 
-void Run_forward(uint32_t speed);
+void Move(void);
 
 #endif

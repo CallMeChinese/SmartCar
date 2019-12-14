@@ -26,10 +26,16 @@ uint8_t* L_End;
 uint8_t* R_Start;
 uint8_t* R_End;
 int32_t  threshold;
-int32_t  Kp;
-int32_t  Ki;
-int32_t  Kd;
-
+double  DirKp;
+double  DirKi;
+double  DirKd;
+double ratio;
+int32_t intercept;
+int32_t forwardSpeed;
+int32_t rotateSpeed;
+int32_t sumError;
+int32_t preError;
+int32_t curError;
 
 
 //每一行的lp1,lp2扫描偏移量

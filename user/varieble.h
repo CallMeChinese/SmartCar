@@ -18,6 +18,9 @@
 #define     car_center          80              //车模中心值
 #define     P_WIDTH             8               //lp1，和lp2指针的之间宽度
 
+#define     BASE_SPEED          800
+#define     LIMITED_SPEED       2000
+
 #define     BW_DELTA            50
 #define     LINE_EDGE           2
 
@@ -39,12 +42,20 @@ extern      uint8_t             *L_Start;
 extern      uint8_t             *L_End;
 extern      uint8_t             *R_Start;
 extern      uint8_t             *R_End;
-extern      int32_t             threshold;
-extern      int32_t             Kp;
-extern      int32_t             Ki;
-extern      int32_t             Kd;
 
-extern const uint8_t offset[];
+extern      int32_t             threshold;
+extern      double              DirKp;
+extern      double              DirKi;
+extern      double              DirKd;
+extern      double              ratio;
+extern      int32_t             intercept;
+extern      int32_t             forwardSpeed;
+extern      int32_t             rotateSpeed;
+extern      int32_t             sumError;
+extern      int32_t             preError;
+extern      int32_t             curError;
+
+extern      const uint8_t       offset[];
 extern      float               number;
 
 extern      uint32_t            flashData[flashInfoNum];

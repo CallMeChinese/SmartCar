@@ -23,22 +23,22 @@
 #include "gui.h"
 
 const uint8_t row_pos[5] = {0, 13, 26, 39, 52};
-uint8_t* options[] = {"Bin Image", "Threshold", "Kp", "Ki", "Kd"};
-int32_t* values[] = {&threshold, &Kp, &Ki, &Kd};
+uint8_t* options[] = {"Bin Image", "Pro Image", "Threshold", "Forward", "Rotate", "CurOffset", "PreOffset", "SumOffset"};
+int32_t* values[] = {&threshold, &forwardSpeed, &rotateSpeed, &curError, &preError, &sumError};
 
-uint8_t keyState = 0;           /* 用于记录五项开关的值 */
-int key_counter = 0;
-int key_temp = 0;
+uint8_t keyState = 0;           // Used to record 5 directed key info
+int key_counter = 0;            // Used to remove joggle
+int key_temp = 0;               // Used to remove joggle
 
 uint8_t optionsCount = sizeof(options)/sizeof(char*);
 uint8_t pagesCount = 2;
 
-int8_t optionIndex = 0;
-uint8_t imgOptionsCount = 1;
-uint8_t page = 0;               /* 初始为第一页 */
-uint8_t option = 0;
-uint8_t pageType = MENU_PAGE;
-uint8_t detailType;
+int8_t optionIndex = 0;         // The index of option, from 0 to max-1
+uint8_t imgOptionsCount = 2;    // The number image display options
+uint8_t page = 0;               // Current page index
+uint8_t option = 0;             // Current option index in one page
+uint8_t pageType = MENU_PAGE;   // Current page type
+uint8_t detailType;             // Current detailed page type
 uint8_t menuRow = 1;            /* 记录当前是第几排 值可以为1、2、3、4、5  修改了排数的除外 */
 
 /**
@@ -143,6 +143,10 @@ void DispDetailPage(void)
         {
             DispBinImg();
             break;
+        }
+        case 1:
+        {
+            DispProcessedImg(true);
         }
         default:
         {
