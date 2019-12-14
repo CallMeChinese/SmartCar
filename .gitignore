@@ -1,4 +1,5 @@
 /*
-!/user/
-!/.gitignore
+!user/
+!.gitignore
+!.gitattributes
 !README.md
