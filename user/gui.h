@@ -21,15 +21,15 @@
 #define IMAGE_PAGE          0
 #define VALUE_PAGE          1
 
+#define MAX_SECTION_COUNT   2
 #define MAX_OPTION_COUNT    4
 
 int keyCheck(void);
 
-void DispMenuPage(void);
-void menu();
-void SignMove();
-void MenuPage();
-void DetailPage();
+void menu(void);
+void ShowMenuPage(void);
+void ShowDetailPage(void);
+void CursorMove(void);
 
 
 extern void FlashValueOperate();
