@@ -36,7 +36,7 @@ int32_t rotateSpeed;
 int32_t sumError;
 int32_t preError;
 int32_t curError;
-
+uint8_t isDebug;
 
 //每一行的lp1,lp2扫描偏移量
 const uint8_t offset[row_num]= {

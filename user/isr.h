@@ -13,9 +13,10 @@
 #define ISR_H_
 
 #include "chlib_k.h"
+#include "motor.h"
 #include "varieble.h"
 
-void GPIO_ISR(uint32_t array);
-// void PE_GPIO_ISR(uint32_t array);
+void GPIOE_ISR(uint32_t array);
 void PIT_ISR(void);
+void GPIOB_ISR(uint32_t array);
 #endif

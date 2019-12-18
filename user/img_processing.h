@@ -14,11 +14,18 @@
 
 #include "common.h"
 
-void LinearFit(uint8_t* dataY, uint8_t dataCnt);
+// #define DETECT_ISLAND
+
+void LinearFit(uint8_t* dataY, uint8_t beginLine, uint8_t dataCnt);
 void Gray2Bin();
+void Gray2BinDyn();
 void GetCenterPoints();
+void GetLeftBorder();
+void GetRightBorder();
+void GetBorder();
+uint8_t DetectIsland();
 void DispBinImg();
-void DispProcessedImg(uint8_t withCenterPoint);
+void DispProcessedImg(uint8_t withCenterPoint, uint8_t removeOther);
 void ImgProcess();
 
 extern int DX[150];

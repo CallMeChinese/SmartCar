@@ -9,37 +9,38 @@
  * 
  */
 
-#include "math.h"
-#include "chlib_k.h"
-#include "varieble.h"
-#include "img_processing.h"
-#include "oled.h"
-#include "init.h"
-#include "ftm.h"
-#include "adc.h"
-#include "gpio.h"
-#include "common.h"
-#include "uart.h"
-#include "gui.h"
-#include "flash.h"
-#include "upper_monitor.h"
 #include "DEV_SCCB.h"
+#include "adc.h"
+#include "chlib_k.h"
+#include "common.h"
+#include "flash.h"
+#include "ftm.h"
+#include "gpio.h"
+#include "gui.h"
+#include "img_processing.h"
+#include "init.h"
+#include "math.h"
 #include "motor.h"
+#include "oled.h"
+#include "uart.h"
+#include "upper_monitor.h"
+#include "varieble.h"
 
 /**
  * @brief 
  * 
  * @return int 
  */
-int main()
-{
-
+int main() {
     init();
-    while (1)
-    {
+    while (1) {
         ImgProcess();
-        Move();
-        menu();
+        if (isDebug == 0) {
+            // TODO: do nothing
+        }
+        else {
+            menu();
+        }
     }
     return 0;
 }

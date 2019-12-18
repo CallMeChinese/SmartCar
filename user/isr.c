@@ -1,10 +1,13 @@
-/*********************************************************/
-//@demo
-//@固件库：超核V2.4
-//@author：th
-//@2016.11.30
-//@for seu2016 摄像头四轮组
-/*********************************************************/
+/**
+ * @file isr.c
+ * @author BadCodeBuilder
+ * @brief 
+ * @version 0.1
+ * @date 2019-12-18
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 
 #include "isr.h"
 #include "MK60DZ10.h"
@@ -12,78 +15,99 @@
 
 uint16_t vsync = 0;
 extern uint8_t keyState;
-//中断服务函数，需要采集数据量(行，场)可自行修改
-//可以在函数中加入led的控制来检测是否进入中断
-//不建议在中断服务函数中执行延时或数据处理/串口收发
-void GPIO_ISR(uint32_t array)
-{
-    // GPIO_ToggleBit(HW_GPIOB, 11);
-    if (array & (1 << 7)) //行中断
-    {
-        if (H_Cnt % 2 == 1 && H_Cnt < 100)
-        {
+
+/**
+ * @brief I really don not know why I cannot use the abs() in math.h, so
+ * I make a new Abs function instead
+ * 
+ * @param a 
+ * @return int 
+ */
+int Abs(int a) {
+    if (a < 0)
+        return -a;
+    else
+        return a;
+}
+
+/**
+ * @brief the interrupt service function of GPIOB port
+ * 
+ * @param array if the interruption of corresponding pin triggered, the bit
+ * of array will be 1, else it will be 0
+ */
+void GPIOB_ISR(uint32_t array) {
+    if (array & (1u << 16)) {
+        isDebug ^= 1;
+    }
+    else {
+    }
+}
+
+/**
+ * @brief the interrupt service function of GPIOE port
+ * 
+ * @param array if the interruption of corresponding pin triggered, the bit
+ * of array will be 1, else it will be 0
+ */
+void GPIOE_ISR(uint32_t array) {
+    // Line interruption
+    if (array & (1u << 7)) {
+        if (H_Cnt % 2 == 1 && H_Cnt < 100) {
             DMA_EnableRequest(HW_DMA_CH0);
         }
         H_Cnt++;
     }
 
-    if (array & (1 << 6)) //场中断
-    {
+    // Field interruption
+    if (array & (1u << 6)) {
         H_Cnt = 0;
-        if (V_Cnt < 20)
+        if (V_Cnt < 20) {
             V_Cnt++;
-        else
-        {                      //20场之后开始采集
+        }
+        else {
+            //20场之后开始采集
             vsync = 1 - vsync; //奇偶场切换
             DMA_SetDestAddress(HW_DMA_CH0, vsync ? (uint32_t)img1[0] : (uint32_t)img2[0]);
             imgadd = vsync ? img2[0] : img1[0];
         }
     }
-
-    // if (array & (1u << 18))
-    // {
-    //     keyState = 2;
-    // }
 }
 
-// void PE_GPIO_ISR(uint32_t array)
-// {
-//     if (array & (1u << 0)) //right 中断
-//     {
-//         keyState = 4;
-//     }
-//     if (array & (1u << 1)) //up 中断
-//     {
-//         keyState = 1;
-//     }
-//     if (array & (1u << 2)) //center 中断
-//     {
-//         keyState = 5;
-//     }
-//     if (array & (1u << 3)) //left 中断
-//     {
-//         keyState = 3;
-//     }
-// }
-
 /**
- * @brief 
+ * @brief the interrupt service function of PIT
  * 
  */
-void PIT_ISR(void)
-{
-    // TODO: make new speeds
+void PIT_ISR(void) {
+    // Calculate the offset between center of the view and the intercept
     int delta;
+    delta = intercept - col_num / 2;
+
+    // Calculate the angel of the line which is fitted by some center points
     double angel;
     angel = atan(ratio);
-    preError = curError;
-    curError = (int)(angel*250);
-    sumError += curError;
-    rotateSpeed = (int)(DirKp*curError + DirKi*sumError + DirKd*(curError-preError));
-    if (rotateSpeed > LIMITED_SPEED) rotateSpeed = LIMITED_SPEED;
-    if (rotateSpeed < -LIMITED_SPEED) rotateSpeed = -LIMITED_SPEED;
 
-    delta = intercept - col_num/2;
+    // Calculate the preError, curError, sumError (Actually sumError is useless)
+    preError = curError;
+    if (angel > 0) {
+        curError = (int)(angel * 300) + 5 * Abs(delta);
+    }
+    else {
+        curError = (int)(angel * 300) - 5 * Abs(delta);
+    }
+    curError = (int)(angel * 230);
+    sumError += curError;
+
+    // Calculate the rotation speed (with some limits)
+    rotateSpeed = (int)(DirKp * curError + DirKi * sumError + DirKd * (curError - preError));
+    if (rotateSpeed > LIMITED_SPEED) {
+        rotateSpeed = LIMITED_SPEED;
+    }
+    if (rotateSpeed < -LIMITED_SPEED) {
+        rotateSpeed = -LIMITED_SPEED;
+    }
+
+    // Calculate the moving forward speed
     forwardSpeed = BASE_SPEED;
     // if (rotateSpeed >= 0)
     // {
@@ -93,4 +117,5 @@ void PIT_ISR(void)
     // {
     //     forwardSpeed = BASE_SPEED + 5*delta;
     // }
+    Move();
 }

@@ -14,7 +14,7 @@
 
 #include "chlib_k.h"
 
-#define INTERVAL        10000           // PIT_controller length, in us
+#define INTERVAL        2000             // PIT_controller length, in us
 
 void init(void);
 void init_ov7620(void);

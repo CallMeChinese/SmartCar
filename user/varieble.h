@@ -18,7 +18,7 @@
 #define     car_center          80              //车模中心值
 #define     P_WIDTH             8               //lp1，和lp2指针的之间宽度
 
-#define     BASE_SPEED          800
+#define     BASE_SPEED          1000
 #define     LIMITED_SPEED       2000
 
 #define     BW_DELTA            50
@@ -54,6 +54,7 @@ extern      int32_t             rotateSpeed;
 extern      int32_t             sumError;
 extern      int32_t             preError;
 extern      int32_t             curError;
+extern      uint8_t             isDebug;
 
 extern      const uint8_t       offset[];
 extern      float               number;

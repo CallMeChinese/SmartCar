@@ -10,11 +10,11 @@
  */
 
 #include "init.h"
-#include "varieble.h"
-#include "isr.h"
-#include "sysinit.h"
 #include "DEV_SCCB.h"
+#include "isr.h"
 #include "oled.h"
+#include "sysinit.h"
+#include "varieble.h"
 
 /**
  * @brief Initialize all
@@ -22,17 +22,18 @@
  * https://www.zhihu.com/question/40950883, or search for other resource
  * 
  */
-void init(void)
-{
+void init(void) {
     // Field Interruption
     GPIO_QuickInit(HW_GPIOC, 6, kGPIO_Mode_IPU);
-    GPIO_CallbackInstall(HW_GPIOC, GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOC, 6, kGPIO_IT_FallingEdge, false); // 上升沿触发
+    GPIO_CallbackInstall(HW_GPIOC, GPIOE_ISR);
+    // Triggered by rising edge because it use 74CH74
+    GPIO_ITDMAConfig(HW_GPIOC, 6, kGPIO_IT_FallingEdge, false);
 
     // Line Interruption
     GPIO_QuickInit(HW_GPIOC, 7, kGPIO_Mode_IPD);
-    GPIO_CallbackInstall(HW_GPIOC, GPIO_ISR);
-    GPIO_ITDMAConfig(HW_GPIOC, 7, kGPIO_IT_RisingEdge, false);  // 下降沿触发
+    GPIO_CallbackInstall(HW_GPIOC, GPIOE_ISR);
+    // Triggered by rising edge because it use 74CH74
+    GPIO_ITDMAConfig(HW_GPIOC, 7, kGPIO_IT_RisingEdge, false);
 
     // PCLK
     GPIO_QuickInit(HW_GPIOC, 2, kGPIO_Mode_IPU);
@@ -62,6 +63,12 @@ void init(void)
     // UART
     UART_QuickInit(UART3_RX_PC16_TX_PC17, 9600);
 
+    // Switches
+    GPIO_QuickInit(HW_GPIOB, 10, kGPIO_Mode_IPD);
+    GPIO_QuickInit(HW_GPIOB, 16, kGPIO_Mode_IPD);
+    GPIO_CallbackInstall(HW_GPIOB, GPIOB_ISR);
+    GPIO_ITDMAConfig(HW_GPIOB, 16, kGPIO_IT_FallingEdge, ENABLE);
+
     init_ov7620();
     init_oled();
     // init_steer();
@@ -74,34 +81,18 @@ void init(void)
     GPIO_ITDMAConfig(HW_GPIOC, 2, kGPIO_DMA_RisingEdge, true);
 
     // 5DirKey
-    GPIO_QuickInit(HW_GPIOE, 0, kGPIO_Mode_IPU);                // Right
-    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    // GPIO_ITDMAConfig(HW_GPIOE, 0, kGPIO_IT_FallingEdge, true);
-    
-    GPIO_QuickInit(HW_GPIOE, 1, kGPIO_Mode_IPU);                // Upper
-    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    // GPIO_ITDMAConfig(HW_GPIOE, 1, kGPIO_IT_FallingEdge, true);
-     
-    GPIO_QuickInit(HW_GPIOE, 3, kGPIO_Mode_IPU);                // Left
-    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    // GPIO_ITDMAConfig(HW_GPIOE, 3, kGPIO_IT_FallingEdge, true);
-    
-    GPIO_QuickInit(HW_GPIOE, 2, kGPIO_Mode_IPU);                // Center
-    // GPIO_CallbackInstall(HW_GPIOE, PE_GPIO_ISR);
-    // GPIO_ITDMAConfig(HW_GPIOE, 2, kGPIO_IT_FallingEdge, true);
-     
-    GPIO_QuickInit(HW_GPIOC, 18, kGPIO_Mode_IPU);               // Down
-    // GPIO_CallbackInstall(HW_GPIOC, GPIO_ISR);
-    // GPIO_ITDMAConfig(HW_GPIOC, 18, kGPIO_IT_FallingEdge, true);
-    // Varielbe
+    GPIO_QuickInit(HW_GPIOE, 0, kGPIO_Mode_IPU);  // Right
+    GPIO_QuickInit(HW_GPIOE, 1, kGPIO_Mode_IPU);  // Upper
+    GPIO_QuickInit(HW_GPIOE, 3, kGPIO_Mode_IPU);  // Left
+    GPIO_QuickInit(HW_GPIOE, 2, kGPIO_Mode_IPU);  // Center
+    GPIO_QuickInit(HW_GPIOC, 18, kGPIO_Mode_IPU); // Down
 }
 
 /**
  * @brief Initialize OV7620
  * 
  */
-void init_ov7620(void)
-{
+void init_ov7620(void) {
     /* DMA初始化 */
     DMA_InitTypeDef DMA_InitStruct1 = {0}; /* 定义初始化结构体 */
     DMA_InitStruct1.chl = HW_DMA_CH0;
@@ -147,8 +138,7 @@ void init_ov7620(void)
  * @brief Initialize oled(just for the format, useless function)
  * 
  */
-void init_oled(void)
-{
+void init_oled(void) {
     OLED_Init();
     return;
 }
@@ -157,8 +147,7 @@ void init_oled(void)
  * @brief Initialize steer
  * 
  */
-void init_steer(void)
-{
+void init_steer(void) {
     return;
 }
 
@@ -166,21 +155,19 @@ void init_steer(void)
  * @brief Initialize motor
  * 
  */
-void init_motor(void)
-{
-    FTM_PWM_QuickInit(FTM0_CH4_PD04, kPWM_EdgeAligned, 1000, 0);        //PWM1   right_forward
-    FTM_PWM_QuickInit(FTM0_CH5_PD05, kPWM_EdgeAligned, 1000, 0);        //PWM2   right_backward
-    FTM_PWM_QuickInit(FTM0_CH6_PD06, kPWM_EdgeAligned, 1000, 0);        //PWM3   left_forward
-    FTM_PWM_QuickInit(FTM0_CH7_PD07, kPWM_EdgeAligned, 1000, 0);        //PWM4   left_backward
+void init_motor(void) {
+    FTM_PWM_QuickInit(FTM0_CH4_PD04, kPWM_EdgeAligned, 1000, 0); //PWM1   right_forward
+    FTM_PWM_QuickInit(FTM0_CH5_PD05, kPWM_EdgeAligned, 1000, 0); //PWM2   right_backward
+    FTM_PWM_QuickInit(FTM0_CH6_PD06, kPWM_EdgeAligned, 1000, 0); //PWM3   left_forward
+    FTM_PWM_QuickInit(FTM0_CH7_PD07, kPWM_EdgeAligned, 1000, 0); //PWM4   left_backward
     return;
 }
 
 /**
- * @brief 
+ * @brief initialize the pit controller
  * 
  */
-void init_controller(void)
-{
+void init_controller(void) {
     PIT_QuickInit(HW_PIT_CH0, INTERVAL);
     PIT_ITDMAConfig(HW_PIT_CH0, kPIT_IT_TOF, ENABLE);
     PIT_CallbackInstall(HW_PIT_CH0, PIT_ISR);
@@ -188,21 +175,21 @@ void init_controller(void)
 }
 
 /**
- * @brief 
+ * @brief initialize all varieble
  * 
  */
-void init_varieble(void)
-{
-    threshold = 110;
-    DirKp = 1;
+void init_varieble(void) {
+    threshold = 100;
+    DirKp = 15;
     DirKi = 0;
-    DirKd = 0;
+    DirKd = 3;
     ratio = 0;
-    intercept = col_num/2;
+    intercept = col_num / 2;
     forwardSpeed = 0;
     rotateSpeed = 0;
     sumError = 0;
     preError = 0;
     curError = 0;
+    isDebug = 0;
     return;
 }

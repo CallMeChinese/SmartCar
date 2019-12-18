@@ -30,42 +30,34 @@
  */
 uint8_t OLED_GRAM[128][8];
 
-uint8_t Int2String(int32_t src, char* dst, uint8_t withSpace)
-{
+uint8_t Int2String(int32_t src, char *dst, uint8_t withSpace) {
     uint8_t isMinus = 0;
     uint8_t lenth = 0;
     int32_t temp = src;
-    if (temp < 0) 
-    {
+    if (temp < 0) {
         isMinus = 1;
         temp *= (-1);
     }
 
-    if (temp == 0)
-    {
+    if (temp == 0) {
         lenth = 1;
         dst[0] = 0 + '0';
         dst[1] = '\0';
     }
-    else
-    {
+    else {
         GPIO_SetBit(HW_GPIOB, 17);
-        while(temp != 0)
-        {
+        while (temp != 0) {
             dst[lenth] = (temp % 10) + '0';
             ++lenth;
             temp /= 10;
         }
         GPIO_ResetBit(HW_GPIOB, 17);
-        if (isMinus)
-        {
+        if (isMinus) {
             dst[lenth] = '-';
             ++lenth;
         }
-        else
-        {
-            if (withSpace)
-            {
+        else {
+            if (withSpace) {
                 dst[lenth] = ' ';
                 ++lenth;
             }
@@ -81,13 +73,11 @@ uint8_t Int2String(int32_t src, char* dst, uint8_t withSpace)
  * @param dat the data/command need to be written
  * @param cmd flag of data/command, 0->command; 1->data
  */
-void OLED_WR_Byte(uint8_t dat, uint8_t cmd)
-{
+void OLED_WR_Byte(uint8_t dat, uint8_t cmd) {
     uint8_t i;
     OLED_RS = cmd; //写命令
     OLED_CS = 0;
-    for (i = 0; i < 8; i++)
-    {
+    for (i = 0; i < 8; i++) {
         OLED_SCLK = 0;
         if (dat & 0x80)
             OLED_SDIN = 1;
@@ -104,16 +94,13 @@ void OLED_WR_Byte(uint8_t dat, uint8_t cmd)
  * @brief Refresh the video memory on OLED screen
  * 
  */
-void OLED_Refresh_Gram(void)
-{
+void OLED_Refresh_Gram(void) {
     uint8_t i, n;
-    for (i = 0; i < 8; i++)
-    {
+    for (i = 0; i < 8; i++) {
         OLED_WR_Byte(0xb0 + i, OLED_CMD); //设置页地址（0~7）
-        OLED_WR_Byte(0x02, OLED_CMD);	 //设置显示位置—列低地址,偏移了2列
-        OLED_WR_Byte(0x10, OLED_CMD);	 //设置显示位置—列高地址
-        for (n = 0; n < 128; n++)
-        {
+        OLED_WR_Byte(0x02, OLED_CMD);     //设置显示位置—列低地址,偏移了2列
+        OLED_WR_Byte(0x10, OLED_CMD);     //设置显示位置—列高地址
+        for (n = 0; n < 128; n++) {
             OLED_WR_Byte(OLED_GRAM[(n + 1) % 128][i], OLED_DATA);
         }
     }
@@ -123,8 +110,7 @@ void OLED_Refresh_Gram(void)
  * @brief Turn on the OLED screen
  * 
  */
-void OLED_Display_On(void)
-{
+void OLED_Display_On(void) {
     OLED_WR_Byte(0X8D, OLED_CMD); //SET DCDC命令
     OLED_WR_Byte(0X14, OLED_CMD); //DCDC ON
     OLED_WR_Byte(0XAF, OLED_CMD); //DISPLAY ON
@@ -134,8 +120,7 @@ void OLED_Display_On(void)
  * @brief Turn off the OLED screen
  * 
  */
-void OLED_Display_Off(void)
-{
+void OLED_Display_Off(void) {
     OLED_WR_Byte(0X8D, OLED_CMD); //SET DCDC命令
     OLED_WR_Byte(0X10, OLED_CMD); //DCDC OFF
     OLED_WR_Byte(0XAE, OLED_CMD); //DISPLAY OFF
@@ -145,8 +130,7 @@ void OLED_Display_Off(void)
  * @brief Clear memory of OLED
  * 
  */
-void OLED_ClearData(void)
-{
+void OLED_ClearData(void) {
     uint8_t i, n;
     for (i = 0; i < 8; i++)
         for (n = 0; n < 128; n++)
@@ -157,8 +141,7 @@ void OLED_ClearData(void)
  * @brief Clear the OLED screen
  * 
  */
-void OLED_Clear(void)
-{
+void OLED_Clear(void) {
     OLED_ClearData();
     OLED_Refresh_Gram();
 }
@@ -171,8 +154,7 @@ void OLED_Clear(void)
  * @param y From up to bottom, in range of [0,64)
  * @param color Point color, 0->black; 1->white
  */
-void OLED_DrawPoint(uint8_t x, uint8_t y, uint8_t color)
-{
+void OLED_DrawPoint(uint8_t x, uint8_t y, uint8_t color) {
     uint8_t pos, bx, temp = 0;
     if (x > 127 || y > 63)
         return; //超出范围了.
@@ -196,13 +178,10 @@ void OLED_DrawPoint(uint8_t x, uint8_t y, uint8_t color)
  * @param y2 Y of end point, y2 >= y1
  * @param color Area color, 0->black; 1->white
  */
-void OLED_Fill(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color)
-{
+void OLED_Fill(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color) {
     uint8_t x, y;
-    for (x = x1; x <= x2; x++)
-    {
-        for (y = y1; y <= y2; y++)
-        {
+    for (x = x1; x <= x2; x++) {
+        for (y = y1; y <= y2; y++) {
             OLED_DrawPoint(x, y, color);
         }
     }
@@ -220,35 +199,27 @@ void OLED_Fill(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color)
  *              0->inverse, white background black character
  *              1->normal, black background white character
  */
-void OLED_DispChar(uint8_t x, uint8_t y, uint8_t chr, uint8_t size, uint8_t mode)
-{
+void OLED_DispChar(uint8_t x, uint8_t y, uint8_t chr, uint8_t size, uint8_t mode) {
     uint8_t temp, t, t1;
     uint8_t y0 = y;
     chr = chr - ' '; //得到偏移后的值
-    for (t = 0; t < size; t++)
-    {
-        if (size == 12)
-        {
+    for (t = 0; t < size; t++) {
+        if (size == 12) {
             temp = asc2_1206[chr][t]; //调用1206字体
         }
-        else
-        {
+        else {
             temp = asc2_1608[chr][t]; //调用1608字体
         }
-        for (t1 = 0; t1 < 8; t1++)
-        {
-            if (temp & 0x80)
-            {
+        for (t1 = 0; t1 < 8; t1++) {
+            if (temp & 0x80) {
                 OLED_DrawPoint(x, y, mode);
             }
-            else
-            {
+            else {
                 OLED_DrawPoint(x, y, !mode);
             }
             temp <<= 1;
             y++;
-            if ((y - y0) == size)
-            {
+            if ((y - y0) == size) {
                 y = y0;
                 x++;
                 break;
@@ -265,25 +236,21 @@ void OLED_DispChar(uint8_t x, uint8_t y, uint8_t chr, uint8_t size, uint8_t mode
  * @param p 
  * @param mode 
  */
-uint8_t OLED_DispString_1608(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uint8_t align)
-{
+uint8_t OLED_DispString_1608(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uint8_t align) {
     uint8_t lenth, i;
-    for (lenth = 0; p[lenth] != '\0'; ++lenth);
-    if (align == ALIGN_LEFT)
-    {
-        while (*p != '\0')
-        {
+    for (lenth = 0; p[lenth] != '\0'; ++lenth)
+        ;
+    if (align == ALIGN_LEFT) {
+        while (*p != '\0') {
             OLED_DispChar(x, y, *p, 16, mode);
             x += 8;
             ++p;
         }
     }
-    else
-    {
+    else {
         x = 127 - x;
         p += lenth;
-        for (i = lenth; i > 0; --i)
-        {
+        for (i = lenth; i > 0; --i) {
             --p;
             x -= 8;
             OLED_DispChar(x, y, *p, 16, mode);
@@ -300,25 +267,21 @@ uint8_t OLED_DispString_1608(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uin
  * @param p 
  * @param mode 
  */
-uint8_t OLED_DispString_1206(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uint8_t align)
-{
+uint8_t OLED_DispString_1206(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uint8_t align) {
     uint8_t lenth, i;
-    for (lenth = 0; p[lenth] != '\0'; ++lenth);
-    if (align == ALIGN_LEFT)
-    {
-        while (*p != '\0')
-        {
+    for (lenth = 0; p[lenth] != '\0'; ++lenth)
+        ;
+    if (align == ALIGN_LEFT) {
+        while (*p != '\0') {
             OLED_DispChar(x, y, *p, 12, mode);
             x += 6;
             ++p;
         }
     }
-    else
-    {
+    else {
         x = 127 - x;
         p += lenth;
-        for (i = lenth; i > 0; --i)
-        {
+        for (i = lenth; i > 0; --i) {
             --p;
             x -= 6;
             OLED_DispChar(x, y, *p, 12, mode);
@@ -336,8 +299,7 @@ uint8_t OLED_DispString_1206(uint8_t x, uint8_t y, uint8_t *p, uint8_t mode, uin
  * @param num 
  * @param mode 
  */
-uint8_t OLED_DispFloat_1206(uint8_t x, uint8_t y, float num, uint8_t mode, uint8_t align)
-{
+uint8_t OLED_DispFloat_1206(uint8_t x, uint8_t y, float num, uint8_t mode, uint8_t align) {
     return 0;
 }
 
@@ -350,28 +312,23 @@ uint8_t OLED_DispFloat_1206(uint8_t x, uint8_t y, float num, uint8_t mode, uint8
  * @param num 
  * @param mode 
  */
-uint8_t OLED_DispInt_1206(uint8_t x, uint8_t y, int32_t num, uint8_t mode, uint8_t align)
-{
+uint8_t OLED_DispInt_1206(uint8_t x, uint8_t y, int32_t num, uint8_t mode, uint8_t align) {
     uint8_t lenth, i;
     char strNum[20] = {0};
     char *strInt = strNum;
     lenth = Int2String(num, strInt, 1);
 
-    if (align == ALIGN_RIGHT)
-    {
+    if (align == ALIGN_RIGHT) {
         x = 121 - x;
-        while(*strInt != '\0')
-        {
+        while (*strInt != '\0') {
             OLED_DispChar(x, y, *strInt, 12, mode);
             ++strInt;
             x -= 6;
         }
     }
-    else
-    {
+    else {
         strInt += lenth;
-        for (i = lenth; i > 0; --i)
-        {
+        for (i = lenth; i > 0; --i) {
             --strInt;
             OLED_DispChar(x, y, *strInt, 12, mode);
             x += 6;
@@ -384,23 +341,22 @@ uint8_t OLED_DispInt_1206(uint8_t x, uint8_t y, int32_t num, uint8_t mode, uint8
  * @brief Soft delay 1ms, In 200MHz PLL
  * 
  */
-void Delay_ms_200M(void)
-{
+void Delay_ms_200M(void) {
     unsigned int a;
     unsigned char b;
     unsigned char c;
 
     for (a = 0; a < 1000; ++a)
         for (b = 0; b < 200; ++b)
-            for (c = 0; c < 200; ++c);
+            for (c = 0; c < 200; ++c)
+                ;
 }
 
 /**
  * @brief Initialize OLED with SSD1306
  * 
  */
-void OLED_Init(void)
-{
+void OLED_Init(void) {
     //蓝宙OLED，使用SPI通信协议。
     //OLED管脚初始化
     OLED_SCLK = 1;
@@ -438,41 +394,31 @@ void OLED_Init(void)
     OLED_WR_Byte(0xA6, OLED_CMD); //设置显示方式;bit0:1,反相显示;0,正常显示
     OLED_WR_Byte(0xAF, OLED_CMD); //开启显示
     OLED_Clear();
-
-    // OLED_DispString_1608(0, 0, (uint8_t *)("OLED"), 1); //初始化成功提示。
-    OLED_Refresh_Gram();
-
     OLED_Welcome();
+    OLED_Clear();
 }
 
 /**
  * @brief Display welcome page
  * 
  */
-void OLED_Welcome(void)
-{
-    for (int i = 0; i < 64; ++i)
-    {
-        for (int t = 0; t < 128; ++t)
-        {
-            if (welcome[i][t] == 1)
-            {
+void OLED_Welcome(void) {
+    for (int i = 0; i < 64; ++i) {
+        for (int t = 0; t < 128; ++t) {
+            if (welcome[i][t] == 1) {
                 OLED_DrawPoint(t, i, 0);
             }
-            else
-            {
+            else {
                 OLED_DrawPoint(t, i, 1);
             }
         }
     }
     OLED_DispString_1608(18, 50, "SEU SMARTCAR", 1, ALIGN_LEFT);
-    //   OLED_DrawPoint(t,i,1);
+    // OLED_DrawPoint(t,i,1);
     OLED_Refresh_Gram();
-    for (int t = 0; t < 10000; ++t)
-    {
-        for (int k = 0; k < 5000; ++k)
-        {
+    for (int t = 0; t < 10000; ++t) {
+        for (int k = 0; k < 5000; ++k) {
         }
     }
-    OLED_Clear();
+    // OLED_Clear();
 }
