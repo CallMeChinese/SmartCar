@@ -15,6 +15,10 @@
 
 uint16_t vsync = 0;
 extern uint8_t keyState;
+extern      int32_t             LeftCadence;               
+extern      int32_t             RightCadence;
+extern      int32_t             LeftDir;
+extern      int32_t             RightDir;
 
 /**
  * @brief I really don not know why I cannot use the abs() in math.h, so
@@ -79,6 +83,9 @@ void GPIOE_ISR(uint32_t array) {
  * 
  */
 void PIT_ISR(void) {
+ // #ifdef encoder
+    Speed_Measure();
+  // #endif  
     // Calculate the offset between center of the view and the intercept
     int delta;
     delta = intercept - col_num / 2;

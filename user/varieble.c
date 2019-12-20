@@ -51,3 +51,8 @@ float number= 0;
 uint8_t testNum = 92;
 uint32_t flashData[flashInfoNum] = {72,68};
 
+/**************************编码器数值******************************/
+int32_t LeftCadence=0;               
+int32_t RightCadence=0;
+int32_t LeftDir=0;
+int32_t RightDir=0;

@@ -16,6 +16,8 @@
 #include "motor.h"
 #include "varieble.h"
 
+#define encoder
+
 void GPIOE_ISR(uint32_t array);
 void PIT_ISR(void);
 void GPIOB_ISR(uint32_t array);

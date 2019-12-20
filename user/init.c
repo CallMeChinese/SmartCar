@@ -39,6 +39,14 @@ void init(void) {
     GPIO_QuickInit(HW_GPIOC, 2, kGPIO_Mode_IPU);
     GPIO_ITDMAConfig(HW_GPIOC, 2, kGPIO_DMA_RisingEdge, false);
 
+    FTM_QD_QuickInit(FTM1_QD_PHA_PB00_PHB_PB01, kFTM_QD_NormalPolarity, kQD_CountDirectionEncoding);//方向-脉冲编码器1初始化   P3
+    //FTM_QD_QuickInit(FTM1_QD_PHA_PB00_PHB_PB01, kFTM_QD_NormalPolarity, kQD_PHABEncoding);//AB相编码器1初始化   P3
+    
+    //编码器2只能使用方向——脉冲编码器，否则获取不了方向
+    LPTMR_PC_QuickInit(LPTMR_ALT2_PC05);//编码器2初始化   P5
+    GPIO_QuickInit(HW_GPIOC, 4, kGPIO_Mode_IFT); //编码器2初始化 IO口读方向  P5
+    
+    
     // Camera data port, Pull down
     GPIO_QuickInit(HW_GPIOC, 8, kGPIO_Mode_IPD);
     GPIO_QuickInit(HW_GPIOC, 9, kGPIO_Mode_IPD);
@@ -117,7 +125,8 @@ void init_ov7620(void) {
 
     /* 配置摄像头寄存器 */
     uint8_t i = 0;
-
+    
+        
     /*
      * 初始化SCCB所需引脚，SCCB是一种简化的类似于I2C的通信协议。
      * 初始化PTC3和PTC0，作为SCCB中的SDA和SCL。

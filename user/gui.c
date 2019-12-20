@@ -25,16 +25,18 @@
 
 const uint8_t row_pos[5] = {0, 13, 26, 39, 52};
 uint8_t *options[] = {"Bin Image", "Pro Image", "Threshold", "Forward",
-                      "Rotate",    "CurOffset", "PreOffset", "SumOffset"};
+                      "Rotate",    "CurOffset", "PreOffset", "SumOffset",
+                      "rightspeed","leftspeed"};
 int32_t *values[] = {&threshold, &forwardSpeed, &rotateSpeed,
-                     &curError,  &preError,     &sumError};
+                     &curError,  &preError,     &sumError,
+                       &LeftCadence, &RightCadence};
 
 uint8_t keyState = 0; // Used to record 5 directed key info
 int key_counter = 0;  // Used to remove joggle
 int key_temp = 0;     // Used to remove joggle
 
 uint8_t optionsCount = sizeof(options) / sizeof(char *);
-uint8_t pagesCount = 2;
+uint8_t pagesCount = 3;
 
 int8_t optionIndex = 0;         // The index of option, from 0 to max-1
 uint8_t imgOptionsCount = 2;    // The number image display options

@@ -61,4 +61,8 @@ extern      float               number;
 
 extern      uint32_t            flashData[flashInfoNum];
 
+extern      int32_t             LeftCadence;               
+extern      int32_t             RightCadence;
+extern      int32_t             LeftDir;
+extern      int32_t             RightDir;
 #endif
