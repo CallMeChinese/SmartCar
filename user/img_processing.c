@@ -370,7 +370,7 @@ void ImgProcess() {
     GetCenterPoints();
     LinearFit(centerPointInv, 0, 22);
 
-// TODO: detect island
+    // TODO: detect island
 #ifdef DETECT_ISLAND
     islandState = DetectIsland();
     switch (islandState) {

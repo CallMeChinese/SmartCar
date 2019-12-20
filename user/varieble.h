@@ -54,15 +54,18 @@ extern      int32_t             rotateSpeed;
 extern      int32_t             sumError;
 extern      int32_t             preError;
 extern      int32_t             curError;
-extern      uint8_t             isDebug;
+extern      int32_t             runMode;
+
+extern      uint8_t             isShowMenu;
+extern      uint8_t             canChangeSpeed;
 
 extern      const uint8_t       offset[];
 extern      float               number;
 
 extern      uint32_t            flashData[flashInfoNum];
 
-extern      int32_t             LeftCadence;               
-extern      int32_t             RightCadence;
-extern      int32_t             LeftDir;
-extern      int32_t             RightDir;
+extern      int32_t             leftCadence;    // 左转速
+extern      int32_t             rightCadence;   // 右转速
+extern      int32_t             leftDir;        // 左前进或后退
+extern      int32_t             rightDir;       // 右前进或后退
 #endif

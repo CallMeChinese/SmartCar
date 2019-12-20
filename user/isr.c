@@ -15,10 +15,6 @@
 
 uint16_t vsync = 0;
 extern uint8_t keyState;
-extern      int32_t             LeftCadence;               
-extern      int32_t             RightCadence;
-extern      int32_t             LeftDir;
-extern      int32_t             RightDir;
 
 /**
  * @brief I really don not know why I cannot use the abs() in math.h, so
@@ -41,8 +37,11 @@ int Abs(int a) {
  * of array will be 1, else it will be 0
  */
 void GPIOB_ISR(uint32_t array) {
-    if (array & (1u << 16)) {
-        isDebug ^= 1;
+    if (array & (1u << 10)) {
+
+    }
+    else if (array & (1u << 16)) {
+        isShowMenu ^= 1;
     }
     else {
     }
@@ -83,39 +82,49 @@ void GPIOE_ISR(uint32_t array) {
  * 
  */
 void PIT_ISR(void) {
- // #ifdef encoder
-    Speed_Measure();
-  // #endif  
-    // Calculate the offset between center of the view and the intercept
-    int delta;
-    delta = intercept - col_num / 2;
+#ifdef DETECT_SPEED
+    SpeedMeasure();
+#endif
 
-    // Calculate the angel of the line which is fitted by some center points
-    double angel;
-    angel = atan(ratio);
+    if (runMode == 0) {
+        canChangeSpeed = 1;
+        // Calculate the offset between center of the view and the intercept
+        int delta;
+        delta = intercept - col_num / 2;
 
-    // Calculate the preError, curError, sumError (Actually sumError is useless)
-    preError = curError;
-    if (angel > 0) {
-        curError = (int)(angel * 300) + 5 * Abs(delta);
-    }
-    else {
-        curError = (int)(angel * 300) - 5 * Abs(delta);
-    }
-    curError = (int)(angel * 230);
-    sumError += curError;
+        // Calculate the angel of the line which is fitted by some center points
+        double angel;
+        angel = atan(ratio);
 
-    // Calculate the rotation speed (with some limits)
-    rotateSpeed = (int)(DirKp * curError + DirKi * sumError + DirKd * (curError - preError));
-    if (rotateSpeed > LIMITED_SPEED) {
-        rotateSpeed = LIMITED_SPEED;
+        // Calculate the preError, curError, sumError (Actually sumError is useless)
+        preError = curError;
+        if (angel > 0) {
+            curError = (int)(angel * 300) + 5 * Abs(delta);
+        }
+        else {
+            curError = (int)(angel * 300) - 5 * Abs(delta);
+        }
+        curError = (int)(angel * 230);
+        sumError += curError;
+
+        // Calculate the rotation speed (with some limits)
+        rotateSpeed = (int)(DirKp * curError + DirKi * sumError + DirKd * (curError - preError));
+        if (rotateSpeed > LIMITED_SPEED) {
+            rotateSpeed = LIMITED_SPEED;
+        }
+        else if (rotateSpeed < -LIMITED_SPEED) {
+            rotateSpeed = -LIMITED_SPEED;
+        }
     }
-    if (rotateSpeed < -LIMITED_SPEED) {
-        rotateSpeed = -LIMITED_SPEED;
+    else if (runMode == 1) {
+        canChangeSpeed = 1;
+    }
+    else if (runMode == 2) {
+        canChangeSpeed = 0;
+        forwardSpeed = 0;
     }
 
     // Calculate the moving forward speed
-    forwardSpeed = BASE_SPEED;
     // if (rotateSpeed >= 0)
     // {
     //     forwardSpeed = BASE_SPEED - 5*delta;

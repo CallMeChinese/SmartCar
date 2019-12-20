@@ -36,7 +36,14 @@ int32_t rotateSpeed;
 int32_t sumError;
 int32_t preError;
 int32_t curError;
-uint8_t isDebug;
+int32_t leftCadence;
+int32_t rightCadence;
+int32_t leftDir;
+int32_t rightDir;
+int32_t runMode;
+
+uint8_t isShowMenu;
+uint8_t canChangeSpeed;
 
 //每一行的lp1,lp2扫描偏移量
 const uint8_t offset[row_num]= {
@@ -50,9 +57,3 @@ const uint8_t offset[row_num]= {
 float number= 0;
 uint8_t testNum = 92;
 uint32_t flashData[flashInfoNum] = {72,68};
-
-/**************************编码器数值******************************/
-int32_t LeftCadence=0;               
-int32_t RightCadence=0;
-int32_t LeftDir=0;
-int32_t RightDir=0;

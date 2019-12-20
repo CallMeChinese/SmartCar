@@ -16,9 +16,9 @@
 #include "motor.h"
 #include "varieble.h"
 
-#define encoder
+#define DETECT_SPEED
 
 void GPIOE_ISR(uint32_t array);
-void PIT_ISR(void);
 void GPIOB_ISR(uint32_t array);
+void PIT_ISR(void);
 #endif

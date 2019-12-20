@@ -36,7 +36,7 @@ int main() {
     init();
     while (1) {
         ImgProcess();
-        if (isDebug == 0) {
+        if (isShowMenu == 0) {
             // TODO: do nothing
         }
         else {

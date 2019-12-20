@@ -39,13 +39,12 @@ void init(void) {
     GPIO_QuickInit(HW_GPIOC, 2, kGPIO_Mode_IPU);
     GPIO_ITDMAConfig(HW_GPIOC, 2, kGPIO_DMA_RisingEdge, false);
 
+    // Encoder
     FTM_QD_QuickInit(FTM1_QD_PHA_PB00_PHB_PB01, kFTM_QD_NormalPolarity, kQD_CountDirectionEncoding);//方向-脉冲编码器1初始化   P3
     //FTM_QD_QuickInit(FTM1_QD_PHA_PB00_PHB_PB01, kFTM_QD_NormalPolarity, kQD_PHABEncoding);//AB相编码器1初始化   P3
-    
     //编码器2只能使用方向——脉冲编码器，否则获取不了方向
     LPTMR_PC_QuickInit(LPTMR_ALT2_PC05);//编码器2初始化   P5
     GPIO_QuickInit(HW_GPIOC, 4, kGPIO_Mode_IFT); //编码器2初始化 IO口读方向  P5
-    
     
     // Camera data port, Pull down
     GPIO_QuickInit(HW_GPIOC, 8, kGPIO_Mode_IPD);
@@ -194,11 +193,17 @@ void init_varieble(void) {
     DirKd = 3;
     ratio = 0;
     intercept = col_num / 2;
-    forwardSpeed = 0;
+    forwardSpeed = BASE_SPEED;
     rotateSpeed = 0;
     sumError = 0;
     preError = 0;
     curError = 0;
-    isDebug = 0;
+    leftCadence = 0;
+    rightCadence = 0;
+    leftDir = 0;
+    rightDir = 0;
+
+    isShowMenu = 0;
+    runMode = 0;
     return;
 }

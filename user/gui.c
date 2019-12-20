@@ -26,10 +26,11 @@
 const uint8_t row_pos[5] = {0, 13, 26, 39, 52};
 uint8_t *options[] = {"Bin Image", "Pro Image", "Threshold", "Forward",
                       "Rotate",    "CurOffset", "PreOffset", "SumOffset",
-                      "rightspeed","leftspeed"};
-int32_t *values[] = {&threshold, &forwardSpeed, &rotateSpeed,
-                     &curError,  &preError,     &sumError,
-                       &LeftCadence, &RightCadence};
+                      "rightspeed","leftspeed", "RunMode"};
+int32_t *values[] = {
+    &threshold, &forwardSpeed, 
+    &rotateSpeed, &curError, &preError, &sumError,
+    &leftCadence, &rightCadence, &runMode};
 
 uint8_t keyState = 0; // Used to record 5 directed key info
 int key_counter = 0;  // Used to remove joggle
@@ -186,6 +187,31 @@ void SignMove() {
             option = optionIndex % MAX_OPTION_COUNT;
         }
         else if (pageType == DETAIL_PAGE) {
+            switch (optionIndex)
+            {
+            case 3:
+            case 8:
+            case 9:
+            {
+                if (canChangeSpeed) {
+                    forwardSpeed += 100;
+                }
+                break;
+            }
+            case 10:
+            {
+                if (runMode == 2) {
+                    forwardSpeed = BASE_SPEED;
+                }
+                runMode = runMode - 1 + 3;
+                runMode %= 3;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            }
         }
         else {
         }
@@ -200,6 +226,31 @@ void SignMove() {
             option = optionIndex % MAX_OPTION_COUNT;
         }
         else if (pageType == DETAIL_PAGE) {
+            switch (optionIndex)
+            {
+            case 3:
+            case 8:
+            case 9:
+            {
+                if (canChangeSpeed) {
+                    forwardSpeed -= 100;
+                }
+                break;
+            }
+            case 10:
+            {
+                if (runMode == 2) {
+                    forwardSpeed = BASE_SPEED;
+                }
+                ++runMode;
+                runMode %= 3;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            }
         }
         else {
         }

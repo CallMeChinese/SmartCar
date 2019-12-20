@@ -16,5 +16,5 @@
 #include "varieble.h"
 #include "lptmr.h"
 void Move(void);
-void Speed_Measure(void);
+void SpeedMeasure(void);
 #endif
